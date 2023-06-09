@@ -1,0 +1,11 @@
+.update_form{
+    margin: 50px auto;
+    width: 50%;
+    border: 1px solid #333;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 30px;
+}
