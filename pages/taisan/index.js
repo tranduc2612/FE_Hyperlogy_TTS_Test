@@ -13,7 +13,6 @@ import InfoIcon from "@mui/icons-material/Info";
 import UpgradeIcon from "@mui/icons-material/Upgrade";
 import Search from "../../components/search/search"
 import React, { useEffect, useState} from "react";
-import renderTaiSan from "../../helper/renderListTs";
 import Button from "@mui/material/Button";
 import {Box, Modal, Pagination, Stack} from "@mui/material";
 import {deleteTaiSanApi, getListTaiSanApi} from "../../servicesApi/taisan";
@@ -32,10 +31,10 @@ const styleModal = {
 	boxShadow: 24,
 	p: 8,
 };
+let count = 0;
 
 export default function TaisanIndex() {
 	const [search,setSearch] = useState("");
-	const [currentPage,setCurrentPage] = useState(1);
 	const [idTsSelected,setIdTsSelected] = useState("");
 
 	// state modal
@@ -86,10 +85,9 @@ export default function TaisanIndex() {
 	useEffect(()=>{
 		const fetchApi = async () =>{
 			const res = await getListTaiSanApi(1,PAGE_SIZE,search);
-			dispatch(actionsTs.getList(res))
+			dispatch(actionsTs.getList(res));
 		}
 		fetchApi()
-
 	},[search])
 
 
@@ -97,7 +95,6 @@ export default function TaisanIndex() {
 	const handlePageChange = async (event, page) =>{
 		const res = await getListTaiSanApi(page,PAGE_SIZE,search);
 		dispatch(actionsTs.getList(res))
-		setCurrentPage(page);
 	}
 
 
@@ -201,7 +198,7 @@ export default function TaisanIndex() {
 			</Modal>
 
 			<Stack marginTop={"30px"} alignItems="center" spacing={2}>
-				<Pagination page={currentPage}
+				<Pagination page={state.currentPage}
 							onChange={handlePageChange}
 							count={state.pageLength}
 							color="primary"

@@ -4,13 +4,10 @@ import {
     AccordionDetails,
     AccordionSummary,
     Box,
-    CardActions,
     CardContent,
-    Modal,
     Typography
 } from "@mui/material";
-import React, {useEffect, useRef, useState} from "react";
-import * as axios from "../../../utils/response";
+import React, {useEffect, useState} from "react";
 import { useRouter } from 'next/router';
 import Search from "../../../components/search/search";
 import TableCell from "@mui/material/TableCell";
@@ -20,9 +17,11 @@ import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
 import Paper from "@mui/material/Paper";
 import TableHead from "@mui/material/TableHead";
-import renderNhanVien from "../../../helper/renderListNv";
 import Button from "@mui/material/Button";
 import {getTaiSanApi} from "../../../servicesApi/taisan";
+import generateTime from "../../../helper/generateTime";
+import {console} from "next/dist/compiled/@edge-runtime/primitives/console";
+import {ganTaiSanForNhanVienApi, getListNhanVienApi} from "../../../servicesApi/nhanvien";
 
 const bull = (
     <Box
@@ -42,89 +41,56 @@ function ExpandMoreIcon() {
 
 function Detail() {
     const router = useRouter();
-    const [data, setData] = useState("")
+    const [data, setData] = useState({})
     const [formGan,setFormGan] = useState(false);
-    const [rows,setRows] = useState([]);
-    const messageRef = useRef();
+    const [listNv,setlistNv] = useState([]);
     const {id} = router.query;
 
-
-    const renderNhanVienOwner = (res)=>{
-        const resData = res.data;
-        if(resData != null){
-            const dateTime = new Date(resData.timecreate);
-            const DateString = dateTime.getDate() + "/" + Number(dateTime.getMonth() + 1) + "/" + dateTime.getFullYear() + "  -  " + dateTime.getHours() + ":" + dateTime.getMinutes();
-            if(resData.timeupdate){
-                const dateTime = new Date(resData.timeupdate);
-                resData.timeupdate = dateTime.getDate() + "/" + Number(dateTime.getMonth() + 1) + "/" + dateTime.getFullYear() + "  -  " + dateTime.getHours() + ":" + dateTime.getMinutes();
-            }else{
-                resData.timeupdate = "Chưa chỉnh sửa lần nào"
-            }
-            const newData = {
-                ...resData,
-                timecreate: DateString
-            }
-            setData(newData)
-        }else{
-            router.push("/notfound");
-        }
-    }
-
     useEffect(()=>{
-
         if(id != undefined){
             const fetchApi = async ()=>{
-                const data = await getTaiSanApi();
-                console.log(data)
+                try{
+                    const res = await getTaiSanApi(id);
+                    if(res.data == null){
+                        router.push("/notfound");
+                    }else{
+                        setData(res.data);
+                    }
+                }catch (e){
+                    console.log(e)
+                }
             }
-            // acti(`/TaiSan/${id}`)
-            //     .then((res)=>{
-            //         renderNhanVienOwner(res);
-            //     })
-            //     .catch((e)=>{
-            //         console.log(e)
-            //     })
+            fetchApi()
         }
     },[id])
 
-    const handleEvenOpenForm = (e)=>{
+    const handleEvenOpenForm = async (e)=>{
         setFormGan(!formGan);
-        axios.Get(`/NhanVien?page=1&size=10`)
-            .then((res)=>{
-                setRows(renderNhanVien(res.data));
-            })
-            .catch((e)=>{
-                console.log(e)
-            })
+        try {
+            const res = await getListNhanVienApi(1,10,"");
+            setlistNv(res);
+        }catch (e){
+            console.log(e)
+        }
     }
 
-    const handleSearch = (value) =>{
-        axios.Get(`/NhanVien?page=1&size=10&nameNv=${value}`)
-            .then((res)=>{
-                setRows(renderNhanVien(res.data));
-            })
-            .catch((e)=>{
-                console.log(e)
-            })
+    const handleSearch = async (value) =>{
+        try {
+            const res = await getListNhanVienApi(1,10,value);
+            setlistNv(res);
+        }catch (e){
+            console.log(e)
+        }
     }
 
-    const handleGan = (e,idNv) =>{
-        axios.Post(`/NhanVien/GanTaiSan?idNv=${idNv}&idTs=${id}`)
-            .then((res)=>{
-                setFormGan(false)
-                axios.Get(`/TaiSan/${id}`)
-                    .then((res)=>{
-                        renderNhanVienOwner(res);
-                        messageRef.current.innerText = res.data.message;
-
-                    })
-                    .catch((e)=>{
-                        console.log(e)
-                    })
-            })
-            .catch((e)=>{
-                console.log(e)
-            })
+    const handleGan = async (e,idNv) =>{
+        const res = await ganTaiSanForNhanVienApi(idNv,id);
+        if(res.success){
+            const getTaisan = await getTaiSanApi(id);
+            setData(getTaisan.data)
+        }else{
+            console.log("lỗi !")
+        }
     }
 
 
@@ -143,7 +109,6 @@ function Detail() {
                     {data.id}
                 </Typography>
             </Box>
-
             {/*Tên tài sản*/}
             <Box sx={{display:"flex", alignItems: "center"}}>
                 <Typography sx={{fontSize: 25, mr:1}} component="div">
@@ -154,7 +119,6 @@ function Detail() {
                     {data.tentaiSan}
                 </Typography>
             </Box>
-
             {/*Số lượng */}
             <Box sx={{display:"flex", alignItems: "center"}}>
                 <Typography sx={{fontSize: 25, mr:1}} component="div">
@@ -172,7 +136,7 @@ function Detail() {
                 </Typography>
 
                 <Typography sx={{fontSize: 20}} color="text.secondary">
-                    {data.timecreate}
+                    {generateTime(data.timecreate)}
                 </Typography>
             </Box>
             {/*Thời gian sửa*/}
@@ -182,7 +146,7 @@ function Detail() {
                 </Typography>
 
                 <Typography sx={{fontSize: 20}} color="text.secondary">
-                    {data.timeupdate}
+                    {data.timeupdate?generateTime(data.timeupdate):"Chưa chỉnh sửa lần nào !"}
                 </Typography>
             </Box>
 
@@ -201,8 +165,9 @@ function Detail() {
                         {!data.idNv?<Box sx={{alignItems: "center"}}>
                             <Typography sx={{fontSize: 20}} color="text.secondary">
                                 Tài sản này chưa có người sở hữu bạn có muốn gán tài sản không ? <Button variant="outlined" style={{cursor: "pointer"}} onClick={handleEvenOpenForm}>Gán tài sản</Button>
-                                {formGan ?<>
-                                    <Search onSearch={handleSearch} /> <Box>
+                            </Typography>
+                                {formGan ? <>
+                                    <Search onSearch={handleSearch} />
 
                                     <TableContainer component={Paper}>
                                         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
@@ -217,30 +182,27 @@ function Detail() {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {rows.map((row) => (
+                                                {listNv.map((row) => (
                                                     <TableRow
-                                                        key={row.name}
+                                                        key={row.idNv}
                                                         sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                                                     >
                                                         <TableCell component="th" scope="row">
-                                                            {row.maNv}
+                                                            {row.idNv}
                                                         </TableCell>
-                                                        <TableCell align="center">{row.name}</TableCell>
+                                                        <TableCell align="center">{row.hoten}</TableCell>
                                                         <TableCell align="center">{row.cmnd}</TableCell>
                                                         <TableCell align="center">{row.email}</TableCell>
                                                         <TableCell align="center">{row.sdt}</TableCell>
                                                         <TableCell align="center">
-                                                            <Button variant="outlined" onClick={(e)=>handleGan(e,row.maNv)}>Gán</Button>
+                                                            <Button variant="outlined" onClick={(e)=>handleGan(e,row.idNv)}>Gán</Button>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))}
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
-                                </Box>
                                 </> : <></>}
-
-                            </Typography>
                         </Box>:<>
                             {/*Mã người sở hữu*/}
                             <Box sx={{display:"flex", alignItems: "center"}}>

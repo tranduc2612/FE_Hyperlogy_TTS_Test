@@ -8,37 +8,27 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import React, {useEffect, useState} from "react";
-import * as axios from "../../utils/response";
-import renderNhanVien from "../../helper/renderListNv";
-
+import {getListNhanVienApi} from "../../servicesApi/nhanvien";
 function NhanVien() {
     const [rows,setRows] = useState([])
+    const [search,setSearch] = useState("")
+
     const handleSearch = (value) =>{
-        axios.Get(`/NhanVien?page=1&size=10&nameNv=${value}`)
-            .then((res)=>{
-                console.log(res)
-                setRows(renderNhanVien(res.data.data));
-            })
-            .catch((e)=>{
-                console.log(e)
-            })
+        setSearch(value);
     }
 
     useEffect(()=>{
-        axios.Get(`/NhanVien?page=1&size=10`)
-            .then((res)=>{
-                console.log(res)
-                setRows(renderNhanVien(res.data.data));
-            })
-            .catch((e)=>{
-                console.log(e)
-            })
-    },[])
+        const fetchApi = async ()=>{
+            const res = await getListNhanVienApi(1,10,search);
+            console.log(res)
+            setRows(res);
+        }
+        fetchApi();
+    },[search])
 
     return ( <section className={style.content}>
         <h1>Danh sách nhân viên</h1>
         <Search onSearch={handleSearch} />
-
         <TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
@@ -58,23 +48,21 @@ function NhanVien() {
                         <TableCell align="center">
                             <b>Số điện thoại</b>
                         </TableCell>
-
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {rows.map((row) => (
                         <TableRow
-                            key={row.name}
+                            key={row.idNv}
                             sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                         >
                             <TableCell component="th" scope="row">
-                                {row.maNv}
+                                {row.idNv}
                             </TableCell>
-                            <TableCell align="center">{row.name}</TableCell>
+                            <TableCell align="center">{row.hoten}</TableCell>
                             <TableCell align="center">{row.cmnd}</TableCell>
                             <TableCell align="center">{row.email}</TableCell>
                             <TableCell align="center">{row.sdt}</TableCell>
-
                         </TableRow>
                     ))}
                 </TableBody>

@@ -1,4 +1,4 @@
-import {DELETE_TAISAN, GET_DETAIL_TAISAN, GET_LIST_TAISAN} from "./constants";
+import {ADD_TAISAN, DELETE_TAISAN, GET_LIST_TAISAN} from "./constants";
 
 export function getList(payload){
     return{
@@ -7,16 +7,10 @@ export function getList(payload){
     }
 }
 
+
 export function deleteTaiSan(payload){
     return{
         type: DELETE_TAISAN,
-        payload
-    }
-}
-
-export function getTaiSan(payload){
-    return{
-        type: GET_DETAIL_TAISAN,
         payload
     }
 }

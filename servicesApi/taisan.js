@@ -1,11 +1,8 @@
-import {Delete, Get} from "../utils/response";
+import {Delete, Get, Patch, Post} from "../utils/response";
 
 export async function getListTaiSanApi(page, size, name){
     const res = await Get(`/taiSan?page=${page}&size=${size}&nameTs=${name}`)
-    return {
-        listTaiSan: res.data.list,
-        pageLength: res.data.length
-    }
+    return res.data
 }
 
 export async function deleteTaiSanApi(idTs){
@@ -16,6 +13,17 @@ export async function deleteTaiSanApi(idTs){
         success: res.success
     }
 }
+
+export async function createTaiSanApi(payload){
+    const res = Post("/TaiSan", payload);
+    return res
+}
+
+export async function updateTaiSanApi(payload){
+    const res = Patch("/TaiSan", payload);
+    return res
+}
+
 
 export async function getTaiSanApi(idTs){
     const res = await Get(`/TaiSan/${idTs}`);

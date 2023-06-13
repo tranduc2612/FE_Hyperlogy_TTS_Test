@@ -1,9 +1,10 @@
-import {ADD_TAISAN, DELETE_TAISAN, GET_DETAIL_TAISAN, GET_LIST_TAISAN} from "../actions/constants";
+import { DELETE_TAISAN, GAN_TAISAN, GET_DETAIL_TAISAN, GET_LIST_TAISAN} from "../actions/constants";
 
 
 export const initState = {
     list: [],
     pageLength: 0,
+    currentPage: 1,
     detail: {},
     input: {}
 }
@@ -11,14 +12,11 @@ export const initState = {
 function TaiSanReducer(state,action){
     switch (action.type){
         case GET_LIST_TAISAN:
-            return {
-                list: action.payload.listTaiSan,
-                pageLength: action.payload.pageLength
+            return {...state,
+                list: action.payload.list,
+                pageLength: action.payload.length,
+                currentPage: action.payload.currentPage
             }
-        case GET_DETAIL_TAISAN:
-            return
-        case ADD_TAISAN:
-            return;
         case DELETE_TAISAN:
             const newList = state.list.filter(e=>e.id != action.payload);
             return {

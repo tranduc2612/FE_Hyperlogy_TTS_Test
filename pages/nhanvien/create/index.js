@@ -4,32 +4,29 @@ import FormNv from "../../../components/form/formNv";
 import * as axios from "../../../utils/response";
 import {console} from "next/dist/compiled/@edge-runtime/primitives/console";
 import {useRouter} from "next/router";
+import {createNhanVienApi} from "../../../servicesApi/nhanvien";
 
 function Create(){
     const router = useRouter()
-    const handleCreate = (resForm) =>{
-        const NhanVienReq = {
-            "idNv": resForm.idNv[0],
-            "hoten": resForm.nameNv[0],
-            "cmnd": resForm.cmndNv[0],
-            "email": resForm.emailNv[0],
-            "sdt": resForm.sdtNv[0]
+    const handleCreate = async (resForm) =>{
+        try {
+            const NhanVienReq = {
+                "idNv": resForm.idNv[0],
+                "hoten": resForm.nameNv[0],
+                "cmnd": resForm.cmndNv[0],
+                "email": resForm.emailNv[0],
+                "sdt": resForm.sdtNv[0]
+            }
+            const res = await createNhanVienApi(NhanVienReq)
+            if(res.success == false){
+                const setMessage = resForm.idNv[1];
+                setMessage({invalid:true ,message: res.message})
+            }else{
+                router.push("/nhanvien")
+            }
+        }catch (e){
+            console.log(e)
         }
-
-        axios.Post(`/NhanVien`,NhanVienReq
-        )
-            .then((res)=>{
-                if(res.success == false){
-                    const setMessage = resForm.idNv[1];
-                    setMessage({invalid:true ,message: res.message})
-                }else{
-                    router.push("/nhanvien")
-                }
-
-            })
-            .catch((e)=>{
-                console.log(e)
-            })
     }
     return <Box component="form"
                 className={style.form_create}
