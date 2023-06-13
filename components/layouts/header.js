@@ -33,12 +33,6 @@ function Header() {
 						</Link>
 					</li>
 					<li className={`${style.item}`}>
-						<Link className={`${style.link}`} href="/taisan/gan">
-							<AddCardIcon />
-							<span>Gán tài sản</span>
-						</Link>
-					</li>
-					<li className={`${style.item}`}>
 						<Link className={`${style.link}`} href="/nhanvien/create">
 							<PersonAddIcon />
 							<span>Tạo nhân viên</span>

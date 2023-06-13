@@ -3,7 +3,7 @@ import {TextField} from "@mui/material";
 import style from "../../styles/CreateTs.module.css";
 import Button from "@mui/material/Button";
 import {useRouter} from "next/router";
-import axios from "../../api/config";
+import axios from "../../utils/response";
 import ValidateForm, {IDTS_FIELD, NAMETAISAN_FIELD, SL_FIELD} from "../../helper/validateForm";
 
 const VALIDATE_TAISAN=[
@@ -19,8 +19,6 @@ const VALIDATE_TAISAN=[
         val:["required","number_upper0"]
     }
 ]
-
-
 
 export default function FormTs({ onSubmit,id,data,messageBtn }){
     const idRef = useRef(data?data.id:"");

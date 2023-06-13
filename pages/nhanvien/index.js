@@ -8,13 +8,13 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import React, {useEffect, useState} from "react";
-import axios from "../../api/config";
+import * as axios from "../../utils/response";
 import renderNhanVien from "../../helper/renderListNv";
 
 function NhanVien() {
     const [rows,setRows] = useState([])
     const handleSearch = (value) =>{
-        axios.get(`/NhanVien?page=1&size=10&nameNv=${value}`)
+        axios.Get(`/NhanVien?page=1&size=10&nameNv=${value}`)
             .then((res)=>{
                 console.log(res)
                 setRows(renderNhanVien(res.data.data));
@@ -25,7 +25,7 @@ function NhanVien() {
     }
 
     useEffect(()=>{
-        axios.get(`/NhanVien?page=1&size=10`)
+        axios.Get(`/NhanVien?page=1&size=10`)
             .then((res)=>{
                 console.log(res)
                 setRows(renderNhanVien(res.data.data));

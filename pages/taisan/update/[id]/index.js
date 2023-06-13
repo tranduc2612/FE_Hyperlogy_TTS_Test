@@ -2,7 +2,7 @@ import {Box} from "@mui/material";
 import style from "../../../../styles/UpdateTs.module.css"
 import FormTs from "../../../../components/form/formTs";
 import {useEffect, useLayoutEffect, useState} from "react";
-import axios from "../../../../api/config";
+import * as axios from "../../../../utils/response";
 import {useRouter} from "next/router";
 import {log} from "next/dist/server/typescript/utils";
 import {console} from "next/dist/compiled/@edge-runtime/primitives/console";
@@ -18,11 +18,11 @@ export default function UpdateTaiSan(){
             "tentaisan": action.actionName[0],
             "sl": action.actionSl[0] == ""? 0 : Number(action.actionSl[0])
         }
-        axios.patch(`/TaiSan`,TaiSanReq
+        axios.Patch(`/TaiSan`,TaiSanReq
         )
             .then((res)=>{
-                if(res.data.success == false){
-                    action.actionId[1]({invalid: true,message:res.data.message})
+                if(res.success == false){
+                    action.actionId[1]({invalid: true,message:res.message})
                 }else{
                     router.push("/taisan")
                 }
@@ -37,9 +37,9 @@ export default function UpdateTaiSan(){
         let {id} = router.query;
         if(!id) return;
         setIdTs(id);
-        axios.get(`/TaiSan/${id}`)
+        axios.Get(`/TaiSan/${id}`)
             .then((res)=>{
-                const resData = res.data.data;
+                const resData = res.data;
                 if(resData != null){
                     setTsUpdate(resData)
                 }else{
