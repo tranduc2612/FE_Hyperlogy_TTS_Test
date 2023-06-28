@@ -1,9 +1,14 @@
 import SearchIcon from '@mui/icons-material/Search';
-import style from "../../styles/Search.module.css"
+import style from "../../styles/Search.module.css";
 function Search({onSearch}) {
+
+	const handleChangeInput = (e)=>{
+		onSearch(e.target.value)
+	}
+
 	return <div className={style.search_form}>
 		<SearchIcon />
-		<input type="text" onChange={(e)=>onSearch(e.target.value)} />
+		<input type="text" onChange={handleChangeInput} />
 	</div>;
 }
 

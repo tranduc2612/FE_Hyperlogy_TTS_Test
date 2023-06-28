@@ -15,25 +15,25 @@ function Header() {
 						<b>Quản lí tài sản</b>
 					</li>
 					<li className={`${style.item}`}>
-						<Link className={`${style.link}`} href="/taisan">
+						<Link className={`${style.link}`} href="/property">
 							<AttachMoneyIcon />
 							<span>Tài sản</span>
 						</Link>
 					</li>
 					<li className={`${style.item}`}>
-						<Link className={`${style.link}`} href="/nhanvien">
+						<Link className={`${style.link}`} href="/staff">
 							<PeopleIcon />
 							<span>Nhân Viên</span>
 						</Link>
 					</li>
 					<li className={`${style.item}`}>
-						<Link className={`${style.link}`} href="/taisan/create">
+						<Link className={`${style.link}`} href="/property/create">
 							<AddCircleIcon />
 							<span>Tạo tài sản</span>
 						</Link>
 					</li>
 					<li className={`${style.item}`}>
-						<Link className={`${style.link}`} href="/nhanvien/create">
+						<Link className={`${style.link}`} href="/staff/create">
 							<PersonAddIcon />
 							<span>Tạo nhân viên</span>
 						</Link>

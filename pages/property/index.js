@@ -1,4 +1,3 @@
-import * as axios from "../../utils/response";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,19 +7,16 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import style from "../../styles/TaiSan.module.css";
 import Link from "next/link";
-import DeleteIcon from "@mui/icons-material/Delete";
-import InfoIcon from "@mui/icons-material/Info";
-import UpgradeIcon from "@mui/icons-material/Upgrade";
 import Search from "../../components/search/search"
 import React, { useEffect, useState} from "react";
 import Button from "@mui/material/Button";
 import {Box, Modal, Pagination, Stack} from "@mui/material";
-import {deleteTaiSanApi, getListTaiSanApi} from "../../servicesApi/taisan";
-import useStore from "../../hooks/useStore";
-import * as actionsTs from "../../actions/taisan"
+import {deletePropertyApi, getPropertiesApi} from "../../services/property";
 import generateTime from "../../helper/generateTime";
+import useDebounce from "../../hooks/useDebounce";
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 2;
+
 const styleModal = {
 	position: 'absolute',
 	top: '50%',
@@ -31,26 +27,29 @@ const styleModal = {
 	boxShadow: 24,
 	p: 8,
 };
-let count = 0;
 
-export default function TaisanIndex() {
+export default function PropertyIndex() {
 	const [search,setSearch] = useState("");
-	const [idTsSelected,setIdTsSelected] = useState("");
-
+	const [idSelected,setIdSelected] = useState("");
+	const [listProper,setListProper] = useState([]);
+	const [page,setPage] = useState({
+		size: 0,
+		total: 0,
+		items: 0,
+		current: 1
+	})
 	// state modal
 	const [openModal,setOpenModal] = useState(false);
 	const [openModalMessage,setOpenModalMessage] = useState(false);
 	const [messageModal,setMessageModal] = useState("Chưa có message !");
+	const valueDebounced = useDebounce(search,500)
 
-	// global state
-	const store = useStore();
-	const [state,dispatch] = store.taiSan
-
+	// Event OpenModal
 	const handleSearch = (value)=>{
 		setSearch(value);
 	}
 	const handleOpenModal = (idTs)=>{
-		setIdTsSelected(idTs);
+		setIdSelected(idTs);
 		setOpenModal(true)
 	}
 	const handleCloseModal = (e)=>{
@@ -64,13 +63,17 @@ export default function TaisanIndex() {
 	}
 
 	//xoa tai san
-	const handleDeleteTaisan = async (e) =>{
+	const handleDeleteProperty = async (e) =>{
 		try{
-			const res = await deleteTaiSanApi(idTsSelected);
+			const res = await deletePropertyApi(idSelected);
 			if(res.success){
-				dispatch(actionsTs.deleteTaiSan(idTsSelected));
 				setMessageModal(res.message)
 				setOpenModalMessage(true)
+				if(listProper.length == 1){
+					await fetchApi(page.current - 1,page.size,search)
+				}else{
+					await fetchApi(page.current,page.size,search)
+				}
 			}else{
 				setMessageModal(res.message)
 				setOpenModalMessage(true)
@@ -81,20 +84,31 @@ export default function TaisanIndex() {
 		setOpenModal(false)
 	}
 
+	// lấy API
+	const fetchApi = async (currentPage,sizePage,nameSearch) =>{
+		try{
+			const res = await getPropertiesApi(currentPage,sizePage,nameSearch);
+			setListProper(res.data);
+			setPage({
+				...page,
+				size: sizePage,
+				current: currentPage,
+				total: res.totalPage
+			})
+		}catch (e){
+			console.log(e)
+		}
+	}
+
 	// get tai san + search phan trang
 	useEffect(()=>{
-		const fetchApi = async () =>{
-			const res = await getListTaiSanApi(1,PAGE_SIZE,search);
-			dispatch(actionsTs.getList(res));
-		}
-		fetchApi()
-	},[search])
+		fetchApi(1,PAGE_SIZE,valueDebounced)
+	},[valueDebounced])
 
 
-
+	// chuyển trang
 	const handlePageChange = async (event, page) =>{
-		const res = await getListTaiSanApi(page,PAGE_SIZE,search);
-		dispatch(actionsTs.getList(res))
+		await fetchApi(page, PAGE_SIZE, search);
 	}
 
 
@@ -128,37 +142,36 @@ export default function TaisanIndex() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{state.list.map((row) => (
-							<TableRow
-								key={row.id}
+						{listProper && listProper.map(e=>{
+							const {property, staff} = e
+							return (<TableRow
+								key={property.idProperty}
 								sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 							>
 								<TableCell component="th" scope="row">
-									{row.id}
+									{property.idProperty}
 								</TableCell>
-								<TableCell align="center">{row.tentaiSan}</TableCell>
-								<TableCell align="center">{row.sl}</TableCell>
-								<TableCell align="center">{row.hoten || "Chưa có"}</TableCell>
-								<TableCell align="center">{generateTime(row.timecreate)}</TableCell>
+								<TableCell align="center">{property.nameProperty}</TableCell>
+								<TableCell align="center">{property.amount}</TableCell>
+								<TableCell align="center">{property.idStaff?`${staff.fullName} - ${staff.idStaff}`:"Chưa có"}</TableCell>
+								<TableCell align="center">{generateTime(property.timeCreate)}</TableCell>
 								<TableCell
 									align="center"
 									style={{ display: "flex", justifyContent: "center" }}
 								>
-									<Link className="custom-btn" href={`taisan/${row.id}`}>
-										<InfoIcon />
+									<Link className="custom-btn" href={`property/${property.idProperty}`}>
 										<span>Chi tiết</span>
 									</Link>
-									<Link className="custom-btn default" href={`taisan/update/${row.id}`}>
-										<UpgradeIcon />
+									<Link className="custom-btn default" href={`property/update/${property.idProperty}`}>
 										<span>Sửa</span>
 									</Link>
-									<Button className="custom-btn danger" onClick={()=>handleOpenModal(row.id)}>
-										<DeleteIcon />
+									<Button className="custom-btn danger" onClick={()=>handleOpenModal(property.idProperty)}>
 										<span>Xóa</span>
 									</Button>
 								</TableCell>
-							</TableRow>
-						))}
+							</TableRow>)
+						})}
+
 					</TableBody>
 				</Table>
 			</TableContainer>
@@ -171,10 +184,10 @@ export default function TaisanIndex() {
 				<Box sx={{ ...styleModal }}>
 					<h2 id="child-modal-title" style={{textAlign:"center"}}>Thông báo</h2>
 					<p id="child-modal-description">
-						Bạn có muốn xóa tài sản - {idTsSelected}
+						Bạn có muốn xóa tài sản - {idSelected}
 					</p>
 					<div style={{display:"flex", justifyContent:"space-around"}}>
-						<Button cx={{m:1}} variant="outlined" className={"danger"} onClick={handleDeleteTaisan}>Xác nhận</Button>
+						<Button cx={{m:1}} variant="outlined" className={"danger"} onClick={handleDeleteProperty}>Xác nhận</Button>
 						<Button cx={{m:1}} variant="outlined" className={"default"} onClick={handleCloseModal}>Hủy</Button>
 					</div>
 				</Box>
@@ -198,9 +211,9 @@ export default function TaisanIndex() {
 			</Modal>
 
 			<Stack marginTop={"30px"} alignItems="center" spacing={2}>
-				<Pagination page={state.currentPage}
+				<Pagination page={page.current}
 							onChange={handlePageChange}
-							count={state.pageLength}
+							count={page.total}
 							color="primary"
 				/>
 			</Stack>

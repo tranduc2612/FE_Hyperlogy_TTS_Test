@@ -4,27 +4,27 @@ const formatEmail = new RegExp("^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+
 const formatCmnd = new RegExp("^\\d{1,12}$")
 const maxLength10 = new RegExp("^(.{0,10})?$");
 const maxLength40 = new RegExp("^(.{0,40})?$");
-// const notSpecialCharacter = new RegExp("^[\u00C0-\u1EF3A-Za-z0-9\s]+$");
 const notSpecialCharacter = /^[\p{L}0-9\s]+$/u;
 const numberAndUpper0 = new RegExp("^[1-9]\\d*$")
 
-// const regexName = /^[\p{L}0-9\s]+$/u;
 
-export const IDNV_FIELD = 'IDNV_FIELD'
-export const NAMENV_FIELD = 'NAMENV_FIELD'
-export const CMND_FIELD = 'CMND_FIELD'
-export const EMAIL_FIELD = 'EMAIL_FIELD'
-export const SDT_FIELD = 'SDT_FIELD'
+export const ID_STAFF = 'ID_STAFF'
+export const NAME_STAFF = 'NAME_STAFF'
+export const IDENTIFY_STAFF = 'IDENTIFY_STAFF'
+export const EMAIL_STAFF = 'EMAIL_STAFF'
+export const PHONE_STAFF = 'PHONE_STAFF'
 
-export const IDTS_FIELD = 'IDTS_FIELD'
-export const NAMETAISAN_FIELD = 'NAMETAISAN_FIELD'
-export const SL_FIELD = 'SL_FIELD'
+export const ID_PROPERTY = 'ID_PROPERTY'
+export const NAME_PROPERTY = 'NAME_PROPERTY'
+export const AMOUNT_PROPERTY = 'AMOUNT_PROPERTY'
 
 export default function ValidateForm(config,value,field){
     const result = {
+        fieldName: field,
         invalid: false,
         message: ""
     }
+
     const valTypes = config.filter(e=>e.field_name == field)[0];
 
     for (let i = 0;i < valTypes.val.length ;i++){
@@ -86,7 +86,7 @@ export default function ValidateForm(config,value,field){
                 break;
             default:
                 result.invalid = false;
-                result.message = "";
+                result.message = "Trường này hợp lệ !";
                 break;
         }
 
